@@ -1,0 +1,1 @@
+'MSFT','NKE','PFE','BA','CAT','V','INTC','CVX','AAPL','HD','MMM','IBM','PG','TRV','CSCO','KO','GE','UTX','WMT','MCD','JNJ','MRK','UNH','XOM','AXP','DIS','GS','VZ','JPM','DD'
