@@ -6,6 +6,7 @@ library(purrr)
 symbols = as.list(read.delim('symbols.txt', sep = ',', header = FALSE))
 
 x = 'CSCO'
+symbol = x
 
 leading = function(symbol){
   earnings = Quandl(paste('ZES/',symbol, sep = ''))
@@ -25,8 +26,8 @@ leading = function(symbol){
   twentydaytrailing = merge(twentydaytrailing, industrial, all = TRUE)
   twentydaytrailing = twentydaytrailing %>% 
     mutate(Outperfom = pctChg>indPctChg) %>% 
-    mutate(Volume = volChg/indVolChg) %>% 
-    mutate(Change = pctChg/indPctChg) %>% 
+    mutate(Volume = volChg-indVolChg) %>% 
+    mutate(Change = pctChg-indPctChg) %>% 
     arrange(desc(Date))
 
  twentydaytrailing <<- na.omit(twentydaytrailing)
@@ -106,7 +107,7 @@ for(i in 1:nrow(total)){
 }
 
 # add categorical for stock up and market outperform
-
+total = mutate(total, Outperformer = (total$StockPerf>0 & total$RelativePerf>0))
 
 # experimenting with how to get correct number of trading days in data pulls
 weekdays(total[1,1], abbreviate = TRUE)
@@ -114,17 +115,21 @@ if(weekdays(total[1,1], abbreviate = TRUE))
   
   for(i in as.list(total[,1])){
     if(i %in% c('Wed','Thu','Fri')){
-      print('True')
+      print(i)
     }
   }
 
 # experimenting with possible variables to include
 
 # creating a count of high volume trading days
-length(twentydaytrailing$volChg[twentydaytrailing$volChg>(mean(twentydaytrailing$volChg)+sd(twentydaytrailing$volChg))])
-
+length(twentydaytrailing$Volume[twentydaytrailing$Volume>(mean(twentydaytrailing$Volume)+.5*sd(twentydaytrailing$Volume))])
+length(twentydaytrailing$Change[twentydaytrailing$Change>(mean(twentydaytrailing$Change)+.5*sd(twentydaytrailing$Change))])
 # creating a count of low volume trading days
-length(twentydaytrailing$volChg[twentydaytrailing$volChg<(mean(twentydaytrailing$volChg)-sd(twentydaytrailing$volChg))])
+length(twentydaytrailing$Volume[twentydaytrailing$Volume<(mean(twentydaytrailing$Volume)-.5*sd(twentydaytrailing$Volume))])
+length(twentydaytrailing$Change[twentydaytrailing$Change<(mean(twentydaytrailing$Change)-.5*sd(twentydaytrailing$Change))])
+
+rollmean(twentydaytrailing$Change, k = 5)[1]
+rollmean(twentydaytrailing$Volume, k = 5)[1]
 
 
 plot(stock$Date,stock$Volume)
